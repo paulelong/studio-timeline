@@ -1,4 +1,4 @@
-export const TIMELINE_QUERY = `*[_type == "entry"] | order(date desc) {
+export const TIMELINE_QUERY = `*[_type == "entry"] | order(date asc) {
   _id,
   title,
   date,
