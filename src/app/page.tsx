@@ -5,13 +5,25 @@ import Timeline from '../../components/Timeline';
 
 export default function Home() {
   const [selectedEntry, setSelectedEntry] = useState<any>(null);
+  const isDev = process.env.NODE_ENV === 'development';
 
   return (
     <div className="flex h-screen" style={{ background: 'var(--background)' }}>
       {/* Left Column: Timeline (25%) */}
       <div className="w-1/4 border-r border-gray-300">
         <div className="p-6 border-b border-gray-300" style={{ background: 'var(--background)' }}>
-          <h1 className="text-2xl font-bold">Studio Timeline</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Studio Timeline</h1>
+            {isDev && (
+              <a
+                href="/studio"
+                className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                title="Edit Site"
+              >
+                Edit
+              </a>
+            )}
+          </div>
         </div>
         <Timeline onSelectEntry={setSelectedEntry} />
       </div>
