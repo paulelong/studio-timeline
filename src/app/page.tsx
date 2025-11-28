@@ -1,65 +1,92 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState } from 'react';
+import Timeline from '@/components/Timeline';
 
 export default function Home() {
+  const [selectedEntry, setSelectedEntry] = useState<any>(null);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex h-screen bg-gray-50">
+      {/* Left Column: Timeline (60%) */}
+      <div className="w-3/5 border-r border-gray-300">
+        <div className="p-6 bg-white border-b border-gray-300">
+          <h1 className="text-2xl font-bold">Studio Timeline</h1>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <Timeline onSelectEntry={setSelectedEntry} />
+      </div>
+
+      {/* Right Column: Detail Viewer (40%) */}
+      <div className="w-2/5 overflow-y-auto">
+        <div className="p-6">
+          {selectedEntry ? (
+            <div>
+              <h2 className="text-xl font-bold mb-4">{selectedEntry.title}</h2>
+              <div className="text-sm text-gray-500 mb-4">
+                {selectedEntry.date &&
+                  new Date(selectedEntry.date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+              </div>
+              <p className="text-gray-700 mb-4">{selectedEntry.excerpt}</p>
+
+              {selectedEntry.tags && selectedEntry.tags.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="font-semibold mb-2">Tags</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedEntry.tags.map((tag: string, idx: number) => (
+                      <span
+                        key={idx}
+                        className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedEntry.media && selectedEntry.media.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="font-semibold mb-2">Media</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {selectedEntry.media.map((media: any, idx: number) => (
+                      <div key={idx} className="bg-gray-100 rounded overflow-hidden">
+                        {media.asset?.url && (
+                          <img
+                            src={media.asset.url}
+                            alt=""
+                            className="w-full h-40 object-cover"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedEntry.relatedDocs && selectedEntry.relatedDocs.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="font-semibold mb-2">Related Documents</h3>
+                  <ul className="list-disc list-inside">
+                    {selectedEntry.relatedDocs.map((doc: any) => (
+                      <li key={doc._id} className="text-blue-600">
+                        {doc.title}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center text-gray-400 mt-20">
+              <p className="text-lg">Select an entry to view details</p>
+            </div>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

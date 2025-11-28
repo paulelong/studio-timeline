@@ -1,36 +1,120 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Studio Timeline
 
-## Getting Started
+A Next.js + Sanity CMS project for managing and displaying a timeline of studio entries with media, documents, and room information.
 
-First, run the development server:
+## Prerequisites
+
+- Node.js 18+ and npm
+- A Sanity account and project
+
+## Setup
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+Required packages (add to package.json if not present):
+- `@sanity/client`
+- `react-pdf`
+- `pdfjs-dist`
+
+```bash
+npm install @sanity/client react-pdf pdfjs-dist
+```
+
+### 2. Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+NEXT_PUBLIC_SANITY_PROJECT_ID=your_project_id_here
+NEXT_PUBLIC_SANITY_DATASET=production
+```
+
+To get your Sanity project ID:
+1. Visit https://www.sanity.io/manage
+2. Select or create a project
+3. Copy the Project ID from the project settings
+
+### 3. Configure Sanity Studio
+
+If you haven't already set up Sanity Studio, initialize it:
+
+```bash
+npm install -g @sanity/cli
+sanity init
+```
+
+Make sure your `sanity.config.ts` imports the schemas from `studio/schemas/index.ts`.
+
+## Running the Project
+
+### Start Next.js Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app will be available at http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Start Sanity Studio
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+In a separate terminal:
 
-## Learn More
+```bash
+cd studio
+sanity start
+```
 
-To learn more about Next.js, take a look at the following resources:
+Or if using the integrated studio at `/studio` route in Next.js, it should already be available at http://localhost:3000/studio
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+studio-timeline/
+├── components/
+│   ├── TimelineCard.tsx      # Individual timeline entry card
+│   ├── Timeline.tsx           # Timeline list with data fetching
+│   └── PdfViewer.tsx          # PDF document viewer
+├── lib/
+│   ├── sanityClient.ts        # Sanity client configuration
+│   └── queries.ts             # GROQ queries
+├── pages/
+│   └── index.tsx              # Main page with two-column layout
+├── studio/
+│   └── schemas/
+│       ├── entry.ts           # Timeline entry schema
+│       ├── doc.ts             # Document schema
+│       ├── room.ts            # Room schema
+│       └── index.ts           # Schema export
+└── .env.local                 # Environment variables (create this)
+```
 
-## Deploy on Vercel
+## Features
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Two-Column Layout**: Timeline on the left (60%), detail viewer on the right (40%)
+- **Timeline Entries**: Display entries with date, title, excerpt, and media thumbnails
+- **Media Gallery**: Support for images and files with captions
+- **Related Documents**: Link to PDF documents (plans, contracts, estimates)
+- **Room References**: Associate entries with specific rooms
+- **Tags**: Organize entries with tags
+- **PDF Viewer**: Built-in PDF viewing with zoom and pagination controls
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Usage
+
+1. Open Sanity Studio and create some content:
+   - Add rooms with short codes and plans
+   - Add documents (PDFs)
+   - Create timeline entries with media and references
+
+2. View the timeline at http://localhost:3000
+3. Click on any entry to see detailed information in the right panel
+
+## Notes
+
+- TypeScript types use `any` for simplicity in this scaffolding
+- Tailwind CSS is used for all styling
+- The app uses React App Router (pages directory)
+- Data fetching uses React hooks (useEffect + useState)

@@ -1,0 +1,47 @@
+import React from 'react';
+
+interface TimelineCardProps {
+  entry: any;
+  onClick?: () => void;
+}
+
+export default function TimelineCard({ entry, onClick }: TimelineCardProps) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const thumbnails = entry.media?.slice(0, 3) || [];
+
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white border border-gray-200 rounded-lg p-4 mb-4 cursor-pointer hover:shadow-lg transition-shadow"
+    >
+      <div className="text-sm text-gray-500 mb-2">
+        {entry.date && formatDate(entry.date)}
+      </div>
+      <h3 className="text-lg font-semibold mb-2">{entry.title}</h3>
+      <p className="text-gray-700 text-sm mb-3">{entry.excerpt}</p>
+      
+      {thumbnails.length > 0 && (
+        <div className="flex gap-2">
+          {thumbnails.map((media: any, idx: number) => (
+            <div key={idx} className="w-20 h-20 bg-gray-200 rounded overflow-hidden">
+              {media.asset?.url && (
+                <img
+                  src={media.asset.url}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
