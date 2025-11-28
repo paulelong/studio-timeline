@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { groqFetch } from '@/lib/sanityClient';
-import { TIMELINE_QUERY } from '@/lib/queries';
+import { groqFetch } from '../lib/sanityClient';
+import { TIMELINE_QUERY } from '../lib/queries';
 import TimelineCard from './TimelineCard';
 
 interface TimelineProps {

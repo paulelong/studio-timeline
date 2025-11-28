@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Timeline from '@/components/Timeline';
+import Timeline from '../../components/Timeline';
 
 export default function Home() {
   const [selectedEntry, setSelectedEntry] = useState<any>(null);
