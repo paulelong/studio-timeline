@@ -7,17 +7,17 @@ export default function Home() {
   const [selectedEntry, setSelectedEntry] = useState<any>(null);
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Left Column: Timeline (60%) */}
-      <div className="w-3/5 border-r border-gray-300">
-        <div className="p-6 bg-white border-b border-gray-300">
+    <div className="flex h-screen" style={{ background: 'var(--background)' }}>
+      {/* Left Column: Timeline (25%) */}
+      <div className="w-1/4 border-r border-gray-300">
+        <div className="p-6 border-b border-gray-300" style={{ background: 'var(--background)' }}>
           <h1 className="text-2xl font-bold">Studio Timeline</h1>
         </div>
         <Timeline onSelectEntry={setSelectedEntry} />
       </div>
 
-      {/* Right Column: Detail Viewer (40%) */}
-      <div className="w-2/5 overflow-y-auto">
+      {/* Right Column: Detail Viewer (75%) */}
+      <div className="w-3/4 overflow-y-auto">
         <div className="p-6">
           {selectedEntry ? (
             <div>
@@ -51,14 +51,14 @@ export default function Home() {
               {selectedEntry.media && selectedEntry.media.length > 0 && (
                 <div className="mb-4">
                   <h3 className="font-semibold mb-2">Media</h3>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-4">
                     {selectedEntry.media.map((media: any, idx: number) => (
                       <div key={idx} className="bg-gray-100 rounded overflow-hidden">
                         {media.asset?.url && (
                           <img
                             src={media.asset.url}
                             alt=""
-                            className="w-full h-40 object-cover"
+                            className="w-full h-auto object-contain"
                           />
                         )}
                       </div>

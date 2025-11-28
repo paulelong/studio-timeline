@@ -19,13 +19,14 @@ export default function TimelineCard({ entry, onClick }: TimelineCardProps) {
   return (
     <div
       onClick={onClick}
-      className="bg-white border border-gray-200 rounded-lg p-4 mb-4 cursor-pointer hover:shadow-lg transition-shadow"
+      className="border border-gray-200 rounded-lg p-4 mb-4 cursor-pointer hover:shadow-lg transition-shadow"
+      style={{ background: 'var(--card-background)' }}
     >
-      <div className="text-sm text-gray-500 mb-2">
+      <div className="text-sm mb-2" style={{ color: 'var(--foreground)', opacity: 0.7 }}>
         {entry.date && formatDate(entry.date)}
       </div>
-      <h3 className="text-lg font-semibold mb-2">{entry.title}</h3>
-      <p className="text-gray-700 text-sm mb-3">{entry.excerpt}</p>
+      <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--foreground)' }}>{entry.title}</h3>
+      <p className="text-sm mb-3" style={{ color: 'var(--foreground)', opacity: 0.85 }}>{entry.excerpt}</p>
       
       {thumbnails.length > 0 && (
         <div className="flex gap-2">
