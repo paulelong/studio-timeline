@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <div className="flex h-screen" style={{ background: 'var(--background)' }}>
       {/* Left Column: Timeline (25%) */}
-      <div className="w-1/4 border-r border-gray-300">
+      <div className="w-1/4 border-r border-gray-300 flex flex-col">
         <div className="p-6 border-b border-gray-300" style={{ background: 'var(--background)' }}>
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Paulys Hotel and Recording Studio timeline</h1>
