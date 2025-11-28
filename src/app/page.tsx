@@ -12,7 +12,7 @@ export default function Home() {
       <div className="w-1/4 border-r border-gray-300">
         <div className="p-6 border-b border-gray-300" style={{ background: 'var(--background)' }}>
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Studio Timeline</h1>
+            <h1 className="text-2xl font-bold">Paulys Hotel and Recording Studio timeline</h1>
             <a
               href="/studio"
               className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
