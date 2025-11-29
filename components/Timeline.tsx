@@ -39,7 +39,7 @@ export default function Timeline({ onSelectEntry }: TimelineProps) {
   }
 
   return (
-    <div className="overflow-y-auto flex-1 p-4">
+    <div className="overflow-y-auto flex-1 px-3 py-3 md:p-4 space-y-3">
       {entries.map((entry) => (
         <TimelineCard
           key={entry._id}
