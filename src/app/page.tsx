@@ -24,7 +24,7 @@ export default function Home() {
 
       {/* Timeline at top */}
       <div className="flex-shrink-0">
-        <Timeline onSelectEntry={setSelectedEntry} />
+        <Timeline onSelectEntry={setSelectedEntry} selectedEntry={selectedEntry} />
       </div>
 
       {/* Content at bottom */}

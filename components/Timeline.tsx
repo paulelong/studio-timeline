@@ -1,18 +1,20 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { groqFetch } from '../lib/sanityClient';
 import { TIMELINE_QUERY } from '../lib/queries';
 import TimelineCard from './TimelineCard';
 
 interface TimelineProps {
   onSelectEntry?: (entry: any) => void;
+  selectedEntry?: any;
 }
 
-export default function Timeline({ onSelectEntry }: TimelineProps) {
+export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps) {
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     async function fetchTimeline() {
@@ -29,6 +31,16 @@ export default function Timeline({ onSelectEntry }: TimelineProps) {
 
     fetchTimeline();
   }, []);
+
+  // Scroll selected card into center
+  useEffect(() => {
+    if (selectedEntry && cardRefs.current[selectedEntry._id]) {
+      const card = cardRefs.current[selectedEntry._id];
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  }, [selectedEntry]);
 
   if (loading) {
     return <div className="p-4 text-gray-500">Loading timeline...</div>;
@@ -55,7 +67,11 @@ export default function Timeline({ onSelectEntry }: TimelineProps) {
       <div className="overflow-x-auto px-3 py-3 md:p-4 border-b border-gray-300">
         <div className="flex gap-3 min-w-max items-stretch">
           {sortedEntries.map((entry) => (
-            <div key={entry._id} className="w-64 h-64 flex-shrink-0">
+            <div
+              key={entry._id}
+              className={`w-64 h-64 flex-shrink-0${selectedEntry && selectedEntry._id === entry._id ? ' ring-2 ring-blue-500' : ''}`}
+              ref={el => (cardRefs.current[entry._id] = el)}
+            >
               <TimelineCard
                 entry={entry}
                 onClick={() => onSelectEntry?.(entry)}
