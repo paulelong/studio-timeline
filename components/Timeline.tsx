@@ -32,12 +32,13 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
     fetchTimeline();
   }, []);
 
-  // Scroll selected card into center
+  // Scroll selected card into view within container
   useEffect(() => {
     if (selectedEntry && cardRefs.current[selectedEntry._id]) {
       const card = cardRefs.current[selectedEntry._id];
       if (card) {
-        card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        // Use scrollIntoView with inline: 'nearest' to prevent page-level scrolling
+        card.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
       }
     }
   }, [selectedEntry]);
