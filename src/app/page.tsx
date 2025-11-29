@@ -7,28 +7,28 @@ export default function Home() {
   const [selectedEntry, setSelectedEntry] = useState<any>(null);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen" style={{ background: 'var(--background)' }}>
-      {/* Left Column: Timeline (25% on desktop, full on mobile) */}
-      <div className="w-full md:w-1/4 md:border-r border-gray-300 flex flex-col">
-        <div className="px-4 py-4 md:p-6 border-b border-gray-300 sticky top-0 z-10" style={{ background: 'var(--background)' }}>
-          <div className="flex items-center justify-between gap-3">
-            <h1 className="text-xl md:text-2xl font-bold leading-tight">Paulys Hotel and Recording Studio timeline</h1>
-            <a
-              href="/studio"
-              className="text-xs md:text-sm bg-blue-600 text-white px-2 py-1 md:px-3 md:py-1 rounded hover:bg-blue-700 transition"
-              title="Edit Site"
-            >
-              Edit
-            </a>
-          </div>
-        </div>
-        <div className="overflow-y-auto md:overflow-visible">
-          <Timeline onSelectEntry={setSelectedEntry} />
+    <div className="flex flex-col min-h-screen" style={{ background: 'var(--background)' }}>
+      {/* Header */}
+      <div className="px-4 py-4 md:p-6 border-b border-gray-300 sticky top-0 z-10" style={{ background: 'var(--background)' }}>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-xl md:text-2xl font-bold leading-tight">Paulys Hotel and Recording Studio timeline</h1>
+          <a
+            href="/studio"
+            className="text-xs md:text-sm bg-blue-600 text-white px-2 py-1 md:px-3 md:py-1 rounded hover:bg-blue-700 transition"
+            title="Edit Site"
+          >
+            Edit
+          </a>
         </div>
       </div>
 
-      {/* Right Column: Detail Viewer (75% on desktop, full on mobile) */}
-      <div className="w-full md:w-3/4 overflow-y-auto">
+      {/* Timeline at top */}
+      <div className="flex-shrink-0">
+        <Timeline onSelectEntry={setSelectedEntry} />
+      </div>
+
+      {/* Content at bottom */}
+      <div className="flex-1 overflow-y-auto border-t border-gray-300">
         <div className="px-4 py-4 md:p-6">
           {selectedEntry ? (
             <div>
