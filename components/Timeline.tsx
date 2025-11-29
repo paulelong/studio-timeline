@@ -70,7 +70,7 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
             <div
               key={entry._id}
               className={`w-64 h-64 flex-shrink-0${selectedEntry && selectedEntry._id === entry._id ? ' ring-2 ring-blue-500' : ''}`}
-              ref={el => (cardRefs.current[entry._id] = el)}
+              ref={el => { cardRefs.current[entry._id] = el; }}
             >
               <TimelineCard
                 entry={entry}
