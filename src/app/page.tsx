@@ -32,14 +32,17 @@ export default function Home() {
         <div className="px-4 py-4 md:p-6">
           {selectedEntry ? (
             <div>
-              <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">{selectedEntry.title}</h2>
-              <div className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4">
-                {selectedEntry.date &&
-                  new Date(selectedEntry.date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+              <div className="flex items-baseline gap-2 mb-3 md:mb-4 flex-wrap">
+                <h2 className="text-lg md:text-xl font-bold m-0 p-0">{selectedEntry.title}</h2>
+                {selectedEntry.date && (
+                  <span className="text-xs md:text-sm text-gray-500 font-normal">
+                    {new Date(selectedEntry.date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </span>
+                )}
               </div>
               <p className="text-gray-700 text-sm md:text-base mb-3 md:mb-4">{selectedEntry.excerpt}</p>
 
