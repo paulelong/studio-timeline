@@ -5,6 +5,55 @@ import Timeline from '../../components/Timeline';
 
 export default function Home() {
   const [selectedEntry, setSelectedEntry] = useState<any>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePersistVideo = async (file: File) => {
+    if (!selectedEntry?._id) {
+      setError('Select an entry before uploading.');
+      return;
+    }
+    setUploading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('entryId', selectedEntry._id);
+
+      const res = await fetch('/api/upload-video', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Upload failed (${res.status})`);
+      }
+      const data = await res.json();
+
+      const newMediaItem = {
+        asset: { url: data.assetUrl, _id: data.assetId },
+        _type: 'file',
+      };
+      setSelectedEntry((prev: any) =>
+        prev
+          ? { ...prev, media: Array.isArray(prev.media) ? [...prev.media, newMediaItem] : [newMediaItem] }
+          : prev
+      );
+    } catch (e: any) {
+      setError(e.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('video/')) {
+      handlePersistVideo(file);
+    } else {
+      setError('Please select a video file.');
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen" style={{ background: 'var(--background)' }}>
@@ -12,14 +61,22 @@ export default function Home() {
       <div className="px-4 py-4 md:p-6 border-b border-gray-300 sticky top-0 z-10" style={{ background: 'var(--background)' }}>
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-xl md:text-2xl font-bold leading-tight">Paulys Hotel and Recording Studio timeline</h1>
-          <a
-            href="/studio"
-            className="text-xs md:text-sm bg-blue-600 text-white px-2 py-1 md:px-3 md:py-1 rounded hover:bg-blue-700 transition"
-            title="Edit Site"
-          >
-            Edit
-          </a>
+          <div className="flex items-center gap-2">
+            <a
+              href="/studio"
+              className="text-xs md:text-sm bg-blue-600 text-white px-2 py-1 md:px-3 md:py-1 rounded hover:bg-blue-700 transition"
+              title="Edit Site"
+            >
+              Edit
+            </a>
+            <label className="text-xs md:text-sm bg-gray-200 text-gray-800 px-2 py-1 md:px-3 md:py-1 rounded cursor-pointer hover:bg-gray-300 transition">
+              Upload Video
+              <input type="file" accept="video/*" className="hidden" onChange={onFileChange} />
+            </label>
+          </div>
         </div>
+        {uploading && <p className="text-xs text-gray-500 mt-2">Uploading video…</p>}
+        {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
       </div>
 
       {/* Timeline at top */}
@@ -66,17 +123,19 @@ export default function Home() {
                 <div className="mb-3 md:mb-4">
                   <h3 className="font-semibold mb-2">Media</h3>
                   <div className="flex flex-col gap-3 md:gap-4">
-                    {selectedEntry.media.map((media: any, idx: number) => (
-                      <div key={idx} className="bg-gray-100 rounded overflow-hidden">
-                        {media.asset?.url && (
-                          <img
-                            src={media.asset.url}
-                            alt=""
-                            className="w-full h-auto object-contain"
-                          />
-                        )}
-                      </div>
-                    ))}
+                    {selectedEntry.media.map((media: any, idx: number) => {
+                      const url = media.asset?.url;
+                      const isVideo = typeof url === 'string' && url.match(/\.(mp4|mov|webm|m4v|avi)$/i);
+                      return (
+                        <div key={idx} className="bg-gray-100 rounded overflow-hidden">
+                          {url && (isVideo ? (
+                            <video src={url} controls className="w-full h-auto object-contain bg-black" />
+                          ) : (
+                            <img src={url} alt="" className="w-full h-auto object-contain" />
+                          ))}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

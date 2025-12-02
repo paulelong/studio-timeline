@@ -68,6 +68,9 @@ export default {
         },
         {
           type: 'file',
+          options: {
+            accept: 'video/*,application/pdf,application/msword,image/*'
+          },
           fields: [
             {
               name: 'caption',
