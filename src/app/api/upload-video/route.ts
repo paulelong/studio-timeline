@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { client } from '@/src/sanity/lib/client';
+import { client } from '../../../../src/sanity/lib/client';
 
 export const runtime = 'nodejs';
 
