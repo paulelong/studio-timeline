@@ -1,77 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
+import MuxPlayer from '@mux/mux-player-react';
 import Timeline from '../../components/Timeline';
 
 export default function Home() {
   const [selectedEntry, setSelectedEntry] = useState<any>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
-
-  const handlePersistVideo = async (file: File) => {
-    if (!selectedEntry?._id) {
-      setError('Select an entry before uploading.');
-      return;
-    }
-    setUploading(true);
-    setUploadProgress('Preparing video...');
-    setError(null);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('entryId', selectedEntry._id);
-
-      setUploadProgress('Processing and optimizing video...');
-      
-      const res = await fetch('/api/upload-video', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      setUploadProgress('Uploading to Sanity...');
-      
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || `Upload failed (${res.status})`);
-      }
-      const data = await res.json();
-
-      setUploadProgress('Complete!');
-      
-      const newMediaItem = {
-        asset: { url: data.assetUrl, _id: data.assetId },
-        _type: 'file',
-      };
-      setSelectedEntry((prev: any) =>
-        prev
-          ? { ...prev, media: Array.isArray(prev.media) ? [...prev.media, newMediaItem] : [newMediaItem] }
-          : prev
-      );
-      
-      // Clear progress after a short delay
-      setTimeout(() => setUploadProgress(''), 2000);
-    } catch (e: any) {
-      setError(e.message || 'Upload failed');
-      setUploadProgress('');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith('video/')) {
-      handlePersistVideo(file);
-    } else {
-      setError('Please select a video file.');
-    }
-  };
+  // Removed direct upload; videos now added through Studio using Mux plugin.
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: 'var(--background)' }}>
+    <div className="flex flex-col min-h-screen bg-[var(--background)]">
       {/* Header */}
-      <div className="px-4 py-4 md:p-6 border-b border-gray-300 sticky top-0 z-10" style={{ background: 'var(--background)' }}>
+      <div className="px-4 py-4 md:p-6 border-b border-gray-300 sticky top-0 z-10 bg-[var(--background)]">
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-xl md:text-2xl font-bold leading-tight">Paulys Hotel and Recording Studio timeline</h1>
           <div className="flex items-center gap-2">
@@ -82,19 +22,8 @@ export default function Home() {
             >
               Edit
             </a>
-            <label className="text-xs md:text-sm bg-gray-200 text-gray-800 px-2 py-1 md:px-3 md:py-1 rounded cursor-pointer hover:bg-gray-300 transition">
-              Upload Video
-              <input type="file" accept="video/*" className="hidden" onChange={onFileChange} />
-            </label>
           </div>
         </div>
-        {uploading && (
-          <div className="mt-2 flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <p className="text-xs text-gray-600">{uploadProgress}</p>
-          </div>
-        )}
-        {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
       </div>
 
       {/* Timeline at top */}
@@ -148,15 +77,24 @@ export default function Home() {
                                      (typeof url === 'string' && url.match(/\.(mp4|mov|webm|m4v|avi)$/i));
                       const isImage = media._type === 'image' || mimeType?.startsWith('image/');
                       const thumbnailUrl = media.thumbnail?.asset?.url;
+                      const isMux = media._type === 'mux.video' && media.playbackId;
                       
                       return (
                         <div key={idx} className="bg-gray-100 rounded overflow-hidden">
-                          {url && (isVideo ? (
-                            <video 
-                              src={url} 
-                              controls 
+                          {isMux ? (
+                            <MuxPlayer
+                              playbackId={media.playbackId}
+                              poster={thumbnailUrl}
+                              streamType="on-demand"
+                              autoPlay={false}
+                              accentColor="#2563eb"
+                              className="w-full h-auto bg-black"
+                            />
+                          ) : url && (isVideo ? (
+                            <video
+                              src={url}
+                              controls
                               className="w-full h-auto object-contain bg-black"
-                              style={{ transform: 'rotate(0deg)' }}
                               playsInline
                               poster={thumbnailUrl || undefined}
                             />

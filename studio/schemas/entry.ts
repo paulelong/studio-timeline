@@ -85,6 +85,18 @@ export default {
             },
           ],
         },
+        {
+          type: 'mux.video',
+          name: 'muxVideo',
+          title: 'Mux Video',
+          fields: [
+            {
+              name: 'caption',
+              title: 'Caption',
+              type: 'string'
+            }
+          ]
+        }
       ],
     },
     {
