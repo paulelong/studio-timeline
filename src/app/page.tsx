@@ -6,6 +6,7 @@ import Timeline from '../../components/Timeline';
 export default function Home() {
   const [selectedEntry, setSelectedEntry] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   const handlePersistVideo = async (file: File) => {
@@ -14,22 +15,30 @@ export default function Home() {
       return;
     }
     setUploading(true);
+    setUploadProgress('Preparing video...');
     setError(null);
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('entryId', selectedEntry._id);
 
+      setUploadProgress('Processing and optimizing video...');
+      
       const res = await fetch('/api/upload-video', {
         method: 'POST',
         body: formData,
       });
+      
+      setUploadProgress('Uploading to Sanity...');
+      
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || `Upload failed (${res.status})`);
       }
       const data = await res.json();
 
+      setUploadProgress('Complete!');
+      
       const newMediaItem = {
         asset: { url: data.assetUrl, _id: data.assetId },
         _type: 'file',
@@ -39,8 +48,12 @@ export default function Home() {
           ? { ...prev, media: Array.isArray(prev.media) ? [...prev.media, newMediaItem] : [newMediaItem] }
           : prev
       );
+      
+      // Clear progress after a short delay
+      setTimeout(() => setUploadProgress(''), 2000);
     } catch (e: any) {
       setError(e.message || 'Upload failed');
+      setUploadProgress('');
     } finally {
       setUploading(false);
     }
@@ -75,7 +88,12 @@ export default function Home() {
             </label>
           </div>
         </div>
-        {uploading && <p className="text-xs text-gray-500 mt-2">Uploading video…</p>}
+        {uploading && (
+          <div className="mt-2 flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            <p className="text-xs text-gray-600">{uploadProgress}</p>
+          </div>
+        )}
         {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
       </div>
 
@@ -129,11 +147,19 @@ export default function Home() {
                       const isVideo = mimeType?.startsWith('video/') || 
                                      (typeof url === 'string' && url.match(/\.(mp4|mov|webm|m4v|avi)$/i));
                       const isImage = media._type === 'image' || mimeType?.startsWith('image/');
+                      const thumbnailUrl = media.thumbnail?.asset?.url;
                       
                       return (
                         <div key={idx} className="bg-gray-100 rounded overflow-hidden">
                           {url && (isVideo ? (
-                            <video src={url} controls className="w-full h-auto object-contain bg-black" />
+                            <video 
+                              src={url} 
+                              controls 
+                              className="w-full h-auto object-contain bg-black"
+                              style={{ transform: 'rotate(0deg)' }}
+                              playsInline
+                              poster={thumbnailUrl || undefined}
+                            />
                           ) : isImage ? (
                             <img src={url} alt="" className="w-full h-auto object-contain" />
                           ) : (

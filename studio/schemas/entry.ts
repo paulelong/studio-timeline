@@ -77,6 +77,12 @@ export default {
               title: 'Caption',
               type: 'string',
             },
+            {
+              name: 'thumbnail',
+              title: 'Thumbnail',
+              type: 'image',
+              description: 'Optional thumbnail for video files',
+            },
           ],
         },
       ],

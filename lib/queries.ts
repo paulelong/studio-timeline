@@ -14,6 +14,12 @@ export const TIMELINE_QUERY = `*[_type == "entry"] | order(date asc) {
       originalFilename,
       mimeType,
       metadata
+    },
+    thumbnail{
+      asset->{
+        _id,
+        url
+      }
     }
   },
   relatedDocs[]->{
