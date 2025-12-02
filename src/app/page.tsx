@@ -125,13 +125,21 @@ export default function Home() {
                   <div className="flex flex-col gap-3 md:gap-4">
                     {selectedEntry.media.map((media: any, idx: number) => {
                       const url = media.asset?.url;
-                      const isVideo = typeof url === 'string' && url.match(/\.(mp4|mov|webm|m4v|avi)$/i);
+                      const mimeType = media.asset?.metadata?.mimeType;
+                      const isVideo = mimeType?.startsWith('video/') || 
+                                     (typeof url === 'string' && url.match(/\.(mp4|mov|webm|m4v|avi)$/i));
+                      const isImage = media._type === 'image' || mimeType?.startsWith('image/');
+                      
                       return (
                         <div key={idx} className="bg-gray-100 rounded overflow-hidden">
                           {url && (isVideo ? (
                             <video src={url} controls className="w-full h-auto object-contain bg-black" />
-                          ) : (
+                          ) : isImage ? (
                             <img src={url} alt="" className="w-full h-auto object-contain" />
+                          ) : (
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="block p-4 text-blue-600 hover:underline">
+                              📄 {media.asset?.originalFilename || 'Download File'}
+                            </a>
                           ))}
                         </div>
                       );
