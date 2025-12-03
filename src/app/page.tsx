@@ -1,8 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import MuxPlayer from '@mux/mux-player-react';
+import React, { useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import Timeline from '../../components/Timeline';
+
+const MuxPlayer = dynamic(() => import('@mux/mux-player-react'), {
+  ssr: false,
+  loading: () => <div className="w-full aspect-video bg-gray-800 animate-pulse" />
+});
 
 export default function Home() {
   const [selectedEntry, setSelectedEntry] = useState<any>(null);
