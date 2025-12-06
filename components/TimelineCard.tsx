@@ -30,17 +30,26 @@ export default function TimelineCard({ entry, onClick }: TimelineCardProps) {
       
       {thumbnails.length > 0 && (
         <div className="flex gap-2">
-          {thumbnails.map((media: any, idx: number) => (
-            <div key={idx} className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded overflow-hidden flex-shrink-0">
-              {media.asset?.url && (
-                <img
-                  src={media.asset.url}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-              )}
-            </div>
-          ))}
+          {thumbnails.map((media: any, idx: number) => {
+            // For Mux videos, construct thumbnail URL from playbackId
+            const isMuxVideo = media._type === 'mux.video';
+            const muxPlaybackId = media.asset?.playbackId;
+            const thumbnailUrl = isMuxVideo && muxPlaybackId 
+              ? `https://image.mux.com/${muxPlaybackId}/thumbnail.jpg?width=214&height=214&fit_mode=smartcrop`
+              : media.asset?.url;
+            
+            return (
+              <div key={idx} className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                {thumbnailUrl && (
+                  <img
+                    src={thumbnailUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
