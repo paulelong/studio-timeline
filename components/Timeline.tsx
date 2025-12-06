@@ -72,13 +72,22 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
       track.style.width = `${timelineWidth}px`;
     }
 
-    sortedEntries.forEach((entry) => {
+    sortedEntries.forEach((entry, index) => {
       const entryDate = new Date(entry.date).getTime();
       const position = ((entryDate - minDate) / dateRange) * 100;
       const point = pointRefs.current[entry._id];
 
       if (point) {
         point.style.left = `${position}%`;
+      }
+
+      // Calculate left padding based on first item's text width
+      if (index === 0 && track) {
+        const label = point?.querySelector('[class*="flex"]');
+        if (label) {
+          const labelWidth = (label as HTMLElement).offsetWidth;
+          track.style.paddingLeft = `${Math.max(labelWidth + 16, 40)}px`;
+        }
       }
     });
   }, [timelineWidth, sortedEntries, minDate, dateRange]);
@@ -112,7 +121,7 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
       </div>
 
       {/* Timeline graphic below - scales to fit width */}
-      <div className="px-3 py-4 md:p-6 overflow-x-auto">
+      <div className="px-3 py-4 md:p-6 overflow-x-auto overflow-y-visible">
         <div
           className="relative min-h-[140px]"
           ref={trackRef}
