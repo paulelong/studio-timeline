@@ -14,10 +14,14 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const pointRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const dragStateRef = useRef({ isDown: false, startX: 0, startScrollLeft: 0 });
 
   useEffect(() => {
     async function fetchTimeline() {
@@ -34,6 +38,78 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
 
     fetchTimeline();
   }, []);
+
+  // Enable drag-to-scroll functionality
+  useEffect(() => {
+    // Use a small delay to ensure DOM is rendered
+    const timer = setTimeout(() => {
+      const container = scrollContainerRef.current;
+      
+      if (!container) {
+        return;
+      }
+
+      const handleMouseDown = (e: MouseEvent) => {
+        dragStateRef.current.isDown = true;
+        dragStateRef.current.startX = e.clientX;
+        dragStateRef.current.startScrollLeft = container.scrollLeft;
+        setIsDragging(false);
+      };
+
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!dragStateRef.current.isDown) return;
+        
+        const distance = dragStateRef.current.startX - e.clientX;
+        
+        if (Math.abs(distance) > 5) {
+          setIsDragging(true);
+        }
+        
+        container.scrollLeft = dragStateRef.current.startScrollLeft + distance;
+      };
+
+      const handleMouseUp = () => {
+        dragStateRef.current.isDown = false;
+      };
+
+      const handleMouseLeave = () => {
+        dragStateRef.current.isDown = false;
+      };
+
+      container.addEventListener('mousedown', handleMouseDown);
+      container.addEventListener('mousemove', handleMouseMove);
+      container.addEventListener('mouseup', handleMouseUp);
+      container.addEventListener('mouseleave', handleMouseLeave);
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [entries]);
+
+  // Check scroll position to show/hide arrows
+  const checkScroll = () => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      setCanScrollLeft(container.scrollLeft > 0);
+      setCanScrollRight(
+        container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+      );
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScroll);
+      window.addEventListener('resize', checkScroll);
+      return () => {
+        container.removeEventListener('scroll', checkScroll);
+        window.removeEventListener('resize', checkScroll);
+      };
+    }
+  }, [entries]);
 
   // Scroll selected card into view within container
   useEffect(() => {
@@ -103,20 +179,37 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
   return (
     <div className="flex flex-col h-full">
       {/* Horizontal scrolling cards at the top */}
-      <div ref={scrollContainerRef} className="overflow-x-auto px-3 py-3 md:p-4 border-b border-gray-300">
-        <div className="flex gap-3 min-w-max items-stretch">
-          {sortedEntries.map((entry) => (
-            <div
-              key={entry._id}
-              className={`w-64 h-64 flex-shrink-0${selectedEntry && selectedEntry._id === entry._id ? ' ring-2 ring-blue-500' : ''}`}
-              ref={el => { cardRefs.current[entry._id] = el; }}
-            >
-              <TimelineCard
-                entry={entry}
-                onClick={() => onSelectEntry?.(entry)}
-              />
-            </div>
-          ))}
+      <div className="relative border-b border-gray-300">
+        {/* Left arrow indicator */}
+        {canScrollLeft && (
+          <div className="absolute left-0 top-0 bottom-0 flex items-center z-10 pl-2">
+            <div className="text-gray-400 text-2xl animate-pulse">&lt;</div>
+          </div>
+        )}
+        
+        {/* Right arrow indicator */}
+        {canScrollRight && (
+          <div className="absolute right-0 top-0 bottom-0 flex items-center z-10 pr-2">
+            <div className="text-gray-400 text-2xl animate-pulse">&gt;</div>
+          </div>
+        )}
+        
+        <div ref={scrollContainerRef} className="overflow-x-auto px-3 py-3 md:p-4 scrollbar-hide cursor-grab active:cursor-grabbing select-none" onSelectCapture={(e) => { e.preventDefault(); }}>
+          <div className="flex gap-3 min-w-max items-stretch">
+            {sortedEntries.map((entry) => (
+              <div
+                key={entry._id}
+                className={`w-64 h-64 flex-shrink-0${selectedEntry && selectedEntry._id === entry._id ? ' ring-2 ring-blue-500' : ''}`}
+                ref={el => { cardRefs.current[entry._id] = el; }}
+                draggable="false"
+              >
+                <TimelineCard
+                  entry={entry}
+                  onClick={() => !isDragging && onSelectEntry?.(entry)}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
