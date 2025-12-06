@@ -148,6 +148,8 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
       track.style.width = `${timelineWidth}px`;
     }
 
+    let maxLabelHeight = 0;
+
     sortedEntries.forEach((entry, index) => {
       const entryDate = new Date(entry.date).getTime();
       const position = ((entryDate - minDate) / dateRange) * 100;
@@ -155,6 +157,10 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
 
       if (point) {
         point.style.left = `${position}%`;
+        const label = point.querySelector('[data-label]') as HTMLElement | null;
+        if (label) {
+          maxLabelHeight = Math.max(maxLabelHeight, label.getBoundingClientRect().height);
+        }
       }
 
       // Calculate left padding based on first item's text width
@@ -166,6 +172,13 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
         }
       }
     });
+
+    if (track) {
+      const baseHeight = 36; // room for line and point
+      const labelPadding = 8; // small breathing room under labels
+      const computedHeight = Math.max(baseHeight + labelPadding + maxLabelHeight, 64);
+      track.style.minHeight = `${computedHeight}px`;
+    }
   }, [timelineWidth, sortedEntries, minDate, dateRange]);
 
   if (loading) {
@@ -214,9 +227,9 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
       </div>
 
       {/* Timeline graphic below - scales to fit width */}
-      <div className="px-3 py-4 md:p-6 overflow-x-auto overflow-y-visible">
+      <div className="px-3 py-2 md:py-3 md:px-6 overflow-x-auto overflow-y-visible">
         <div
-          className="relative min-h-[140px]"
+          className="relative"
           ref={trackRef}
         >
           {/* Timeline line */}
@@ -240,7 +253,7 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
 
                     {/* Date label */}
                     <div className="absolute top-8 -translate-x-full -translate-y-1/2 whitespace-nowrap">
-                      <div className={`origin-bottom-right -rotate-45 flex flex-col gap-0.5 items-end`}>
+                      <div className={`origin-bottom-right -rotate-45 flex flex-col gap-0.5 items-end`} data-label>
                         <div className="text-[10px] font-semibold text-gray-700">
                           {new Date(entry.date).toLocaleDateString('en-US', {
                             year: 'numeric',

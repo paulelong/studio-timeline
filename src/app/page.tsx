@@ -37,7 +37,7 @@ export default function Home() {
       </div>
 
       {/* Content at bottom */}
-      <div className="flex-1 overflow-y-auto border-t border-gray-300">
+      <div className="border-t border-gray-300">
         <div className="px-4 py-4 md:p-6">
           {selectedEntry ? (
             <div>
@@ -139,7 +139,7 @@ export default function Home() {
               )}
             </div>
           ) : (
-            <div className="text-center text-gray-400 mt-10 md:mt-20">
+            <div className="text-center text-gray-400 mt-6 md:mt-10">
               <p className="text-base md:text-lg">Select an entry to view details</p>
             </div>
           )}
