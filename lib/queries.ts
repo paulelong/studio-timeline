@@ -8,20 +8,23 @@ export const TIMELINE_QUERY = `*[_type == "entry"] | order(date asc) {
   rooms,
   media[]{
     _type,
+    _key,
     asset->{
       _id,
       url,
       originalFilename,
       mimeType,
-      metadata
+      metadata,
+      playbackId,
+      assetId,
+      status
     },
     thumbnail{
       asset->{
         _id,
         url
       }
-    },
-    playbackId
+    }
   },
   relatedDocs[]->{
     _id,

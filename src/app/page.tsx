@@ -76,19 +76,22 @@ export default function Home() {
                   <h3 className="font-semibold mb-2">Media</h3>
                   <div className="flex flex-col gap-3 md:gap-4">
                     {selectedEntry.media.map((media: any, idx: number) => {
+                      console.log('Media item:', JSON.stringify(media, null, 2)); // Debug log
                       const url = media.asset?.url;
                       const mimeType = media.asset?.metadata?.mimeType;
                       const isVideo = mimeType?.startsWith('video/') || 
                                      (typeof url === 'string' && url.match(/\.(mp4|mov|webm|m4v|avi)$/i));
                       const isImage = media._type === 'image' || mimeType?.startsWith('image/');
                       const thumbnailUrl = media.thumbnail?.asset?.url;
-                      const isMux = media._type === 'mux.video' && media.playbackId;
+                      // For Mux videos, the playbackId is in the dereferenced asset
+                      const muxPlaybackId = media.asset?.playbackId;
+                      const isMux = media._type === 'mux.video' && muxPlaybackId;
                       
                       return (
                         <div key={idx} className="bg-gray-100 rounded overflow-hidden">
                           {isMux ? (
                             <MuxPlayer
-                              playbackId={media.playbackId}
+                              playbackId={muxPlaybackId}
                               poster={thumbnailUrl}
                               streamType="on-demand"
                               autoPlay={false}
@@ -110,6 +113,11 @@ export default function Home() {
                               📄 {media.asset?.originalFilename || 'Download File'}
                             </a>
                           ))}
+                          {media._type === 'mux.video' && !isMux && (
+                            <div className="p-4 text-red-600 text-sm">
+                              Mux video error: Missing playbackId. Data: {JSON.stringify(media)}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
