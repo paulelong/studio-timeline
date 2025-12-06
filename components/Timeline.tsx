@@ -15,6 +15,7 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     async function fetchTimeline() {
@@ -36,9 +37,17 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
   useEffect(() => {
     if (selectedEntry && cardRefs.current[selectedEntry._id]) {
       const card = cardRefs.current[selectedEntry._id];
-      if (card) {
-        // Use scrollIntoView with inline: 'nearest' to prevent page-level scrolling
-        card.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+      const container = scrollContainerRef.current;
+
+      if (card && container) {
+        const cardRect = card.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+
+        // Center the selected card within the horizontal scroller
+        const cardOffsetWithinContainer = cardRect.left - containerRect.left + container.scrollLeft;
+        const targetScrollLeft = cardOffsetWithinContainer - (container.clientWidth / 2) + (cardRect.width / 2);
+
+        container.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
       }
     }
   }, [selectedEntry]);
@@ -65,7 +74,7 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
   return (
     <div className="flex flex-col h-full">
       {/* Horizontal scrolling cards at the top */}
-      <div className="overflow-x-auto px-3 py-3 md:p-4 border-b border-gray-300">
+      <div ref={scrollContainerRef} className="overflow-x-auto px-3 py-3 md:p-4 border-b border-gray-300">
         <div className="flex gap-3 min-w-max items-stretch">
           {sortedEntries.map((entry) => (
             <div
