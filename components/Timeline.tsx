@@ -16,6 +16,8 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
   const [error, setError] = useState<string | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const pointRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     async function fetchTimeline() {
@@ -52,14 +54,6 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
     }
   }, [selectedEntry]);
 
-  if (loading) {
-    return <div className="p-4 text-gray-500">Loading timeline...</div>;
-  }
-
-  if (error) {
-    return <div className="p-4 text-red-500">Error: {error}</div>;
-  }
-
   // Sort entries by date
   const sortedEntries = [...entries].sort((a, b) => {
     return new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -67,9 +61,35 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
 
   // Get date range for timeline
   const dates = sortedEntries.map(entry => new Date(entry.date).getTime());
-  const minDate = Math.min(...dates);
-  const maxDate = Math.max(...dates);
-  const dateRange = maxDate - minDate || 1;
+  const minDate = dates.length ? Math.min(...dates) : Date.now();
+  const maxDate = dates.length ? Math.max(...dates) : minDate;
+  const dateRange = Math.max(maxDate - minDate, 1);
+  const timelineWidth = Math.max(sortedEntries.length * 160, 800);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (track) {
+      track.style.width = `${timelineWidth}px`;
+    }
+
+    sortedEntries.forEach((entry) => {
+      const entryDate = new Date(entry.date).getTime();
+      const position = ((entryDate - minDate) / dateRange) * 100;
+      const point = pointRefs.current[entry._id];
+
+      if (point) {
+        point.style.left = `${position}%`;
+      }
+    });
+  }, [timelineWidth, sortedEntries, minDate, dateRange]);
+
+  if (loading) {
+    return <div className="p-4 text-gray-500">Loading timeline...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -92,38 +112,43 @@ export default function Timeline({ onSelectEntry, selectedEntry }: TimelineProps
       </div>
 
       {/* Timeline graphic below - scales to fit width */}
-      <div className="px-3 py-4 md:p-6">
-        <div className="relative w-full min-h-[100px]">
+      <div className="px-3 py-4 md:p-6 overflow-x-auto">
+        <div
+          className="relative min-h-[140px]"
+          ref={trackRef}
+        >
           {/* Timeline line */}
           <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-300"></div>
           
           {/* Timeline points */}
           <div className="relative">
             {sortedEntries.map((entry, index) => {
-              const entryDate = new Date(entry.date).getTime();
-              const position = ((entryDate - minDate) / dateRange) * 100;
+              const stagger = index % 2 === 0 ? 'translate-y-6' : 'translate-y-12';
               
               return (
                 <div
                   key={entry._id}
-                  className="absolute cursor-pointer hover:scale-110 transition-transform"
-                  style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
+                  className="absolute -translate-x-1/2 cursor-pointer hover:scale-110 transition-transform"
+                  ref={el => { pointRefs.current[entry._id] = el; }}
                   onClick={() => onSelectEntry?.(entry)}
                 >
                   {/* Date point */}
                   <div className="relative">
                     <div className="w-3 h-3 bg-blue-600 rounded-full border-2 border-white shadow-md"></div>
-                    
+
                     {/* Date label */}
-                    <div className="absolute top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                      <div className="text-xs font-semibold text-gray-700">
-                        {new Date(entry.date).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                        })}
-                      </div>
-                      <div className="text-xs text-gray-500 text-center mt-1 max-w-[100px] truncate">
-                        {entry.title}
+                    <div className="absolute top-8 -translate-x-full -translate-y-1/2 whitespace-nowrap">
+                      <div className={`origin-bottom-right -rotate-45 flex flex-col gap-0.5 items-end`}>
+                        <div className="text-[10px] font-semibold text-gray-700">
+                          {new Date(entry.date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </div>
+                        <div className="text-[10px] text-gray-500 max-w-[160px] truncate text-right">
+                          {entry.title}
+                        </div>
                       </div>
                     </div>
                   </div>
